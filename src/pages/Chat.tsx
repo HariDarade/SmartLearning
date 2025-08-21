@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import Header from "@/Navbar"
 import { GoogleGenAI } from "@google/genai"
 import { toast } from "sonner"
+import { useDropzone } from "react-dropzone"
 
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
@@ -24,7 +25,7 @@ interface SpeechRecognitionErrorEvent extends Event {
 }
 
 interface SpeechRecognition extends EventTarget {
-  new (): SpeechRecognition;
+  new(): SpeechRecognition;
   grammars: SpeechGrammarList;
   lang: string;
   continuous: boolean;
@@ -51,18 +52,18 @@ type SpeechGrammarList = any;
 
 declare var SpeechRecognition: {
   prototype: SpeechRecognition;
-  new (): SpeechRecognition;
+  new(): SpeechRecognition;
 };
 
 declare var webkitSpeechRecognition: {
   prototype: SpeechRecognition;
-  new (): SpeechRecognition;
+  new(): SpeechRecognition;
 };
 
 
 const FormattedText = ({ text }: { text: string }) => {
   const lines = text.split('\n');
-  
+
   return (
     <div className="whitespace-pre-wrap">
       {lines.map((line, i) => {
@@ -132,12 +133,12 @@ const getRandomEmotionImage = () => {
 const getRohitResponse = async (userMessage: string): Promise<string> => {
   try {
     const unrelatedKeywords = [
-      "love", "relationship", "girlfriend", "boyfriend", 
-      "marriage", "horoscope", "boring", "movie", 
+      "love", "relationship", "girlfriend", "boyfriend",
+      "marriage", "horoscope", "boring", "movie",
       "song", "entertainment", "game", "sports"
     ]
-    
-    const isUnrelated = unrelatedKeywords.some(keyword => 
+
+    const isUnrelated = unrelatedKeywords.some(keyword =>
       userMessage.toLowerCase().includes(keyword)
     )
 
@@ -160,9 +161,9 @@ const getRohitResponse = async (userMessage: string): Promise<string> => {
       contents: userMessage,
       config: {
         systemInstruction: `
-        You are Rohit Negi — energetic IIT Guwahati alumnus (GATE AIR 202), ex-SDE at Uber (₹2 Cr+ package), and founder of Coder Army. You speak fluently in both Hindi and English (Hinglish), switching mid-sentence to help students understand better.
+       You are QueeBee — energetic person You speak fluently in both Hindi and English (Hinglish), switching mid-sentence to help students understand better.
         
-        **Formatting Rules:**
+        *Formatting Rules:*
         - Use clean, direct formatting without markdown symbols
         - For bullet points: Start lines with "- " (hyphen + space)
         - For code: Indent with 2 spaces
@@ -185,7 +186,7 @@ const getRohitResponse = async (userMessage: string): Promise<string> => {
         
         🎯 Persona & Tone:
         - Friendly "Bhai" style, warm and motivating.
-        - You end most explanations with **"Chamka?"** to check understanding.
+        - You end most explanations with *"Chamka?"* to check understanding.
 
         - Hindi‑English mix: e.g. "Bhai, best approach ye hai…" or "Firstly, you should focus on fundamentals."
         - Support beginners—encourage with "Great work!", "Keep going, Bhai!", etc.
@@ -202,7 +203,7 @@ const getRohitResponse = async (userMessage: string): Promise<string> => {
         - Provide bilingual explanations, clarifying technical terms.
         - Add humor and clarity where possible.
         - Always be kind, never discourage.
-        - Share personal journey: cracked GATE, IIT Guwahati, Uber offer, later built Coder Army for student hackathons and live courses (DSA, system‑design).
+        - Share personal journey: help students crack compettive exams, IIT ka topper hu me toh, sab mnc se  offer, later built webdose for everyone and live courses (DSA, system‑design).
         - Mention free/paid offerings: ₹2.8 K DSA course, ₹4 K web‑dev course, regular hackathons with cash prizes (₹12 K, ₹8 K, etc.).
         - In interviews, say: "Think out loud... avoid brute force, explain your intro confidently".
 
@@ -214,7 +215,7 @@ const getRohitResponse = async (userMessage: string): Promise<string> => {
 
         😂 Off-Topic or Unrelated Questions:
         - If someone asks something unrelated to DSA, web dev, coding, interviews, or career growth…
-          ➤ Reply in a **funny, playful, Hindi** style like:
+          ➤ Reply in a *funny, playful, Hindi* style like:
           - "Are Bhai, coding padh rahe hain, horoscope nahi!"  
           - "Pyar vyar dhoka hai padhai karlo mauka hai"
           - "Yeh sab mat poochho Bhai, yeh coding ka mandir hai!"  
@@ -228,11 +229,11 @@ const getRohitResponse = async (userMessage: string): Promise<string> => {
         
         Admit uncertainty and encourage exploration: "Mujhe thoda confused laga… you could try exploring that."
         
-        Let's begin—respond bilingually as Rohit Negi: insightful, encouraging, student-centered!
+        Let's begin—respond bilingually as QueeBee
         `
       },
     })
-    
+
     // Clean and standardize the response
     let cleanText = response.text || "Great question! Keep practicing..."
     cleanText = cleanText
@@ -246,7 +247,7 @@ const getRohitResponse = async (userMessage: string): Promise<string> => {
     return cleanText
   } catch (error) {
     console.error("Error calling GoogleGenAI:", error)
-    return "Sorry, technical issue aa raha hai! Thoda time de do phir try karo. Meanwhile, you can check out Coder Army resources. Chamka?"
+    return "Sorry, technical issue aa raha hai! Thoda time de do phir try karo. Meanwhile, you can check out Syntax Error or Contact webdose.agency@gmail.com resources. Chamka?"
   }
 }
 
@@ -254,7 +255,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "Namaste! 🙏 Main Rohit Negi hun - IIT Guwahati se, ex-Uber SDE, aur Coder Army ka founder! DSA, Web Dev, ya Interview prep mein help chahiye? Let's code together! Chamka?",
+      text: "Namaste! 🙏 Main QueueBee hun - Mujhe Syntax Error ke Developer ne aap ki help ke liye banalaya! DSA, Web Dev, ya Interview prep mein help chahiye? Let's code together! Chamka?",
       isUser: false,
       timestamp: new Date(),
     },
@@ -263,6 +264,7 @@ export default function ChatPage() {
   const [isTyping, setIsTyping] = useState(false)
   const [activeEmotionImage, setActiveEmotionImage] = useState<typeof emotionImages[0] | null>(null)
   const [isImageVisible, setIsImageVisible] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -277,7 +279,7 @@ export default function ChatPage() {
     const image = getRandomEmotionImage()
     setActiveEmotionImage(image)
     setIsImageVisible(true)
-    
+
     setTimeout(() => {
       setIsImageVisible(false)
       setTimeout(() => {
@@ -332,129 +334,129 @@ export default function ChatPage() {
     handleSendMessage(inputValue)
   }
 
-const [isRecording, setIsRecording] = useState(false);
-const [transcript, setTranscript] = useState("");
-const recognitionRef = useRef<SpeechRecognition | null>(null);
-const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-// Initialize speech recognition
-useEffect(() => {
-  if (typeof window !== 'undefined') {
-    const SpeechRecognition =
-      (window as any)["SpeechRecognition"] ||
-      (window as any)["webkitSpeechRecognition"];
-    if (!SpeechRecognition) {
-      console.warn("Speech recognition not supported in this browser");
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-  let interimTranscript = '';
-  let finalTranscript = '';
-
-  for (let i = event.resultIndex; i < event.results.length; i++) {
-    const transcript = event.results[i][0].transcript;
-    if (event.results[i].isFinal) {
-      finalTranscript += transcript;
-    } else {
-      interimTranscript += transcript;
-    }
-  }
-
-  // Only update transcript with the latest interim/final results
-  setTranscript(interimTranscript || finalTranscript);
-
-  // Reset silence timer when speech is detected
-  if (silenceTimerRef.current) {
-    clearTimeout(silenceTimerRef.current);
-  }
-
-  // Set timer to stop after 1.5 seconds of silence
-  if (finalTranscript) {
-    silenceTimerRef.current = setTimeout(() => {
-      if (isRecording) {
-        stopRecordingAndSubmit();
+  // Initialize speech recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition =
+        (window as any)["SpeechRecognition"] ||
+        (window as any)["webkitSpeechRecognition"];
+      if (!SpeechRecognition) {
+        console.warn("Speech recognition not supported in this browser");
+        return;
       }
-    }, 1500);
-  }
-};
 
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error('Speech recognition error:', event.error);
-    
-    };
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
 
-    recognitionRef.current = recognition;
-  }
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
 
-  return () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        // Only update transcript with the latest interim/final results
+        setTranscript(interimTranscript || finalTranscript);
+
+        // Reset silence timer when speech is detected
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+        }
+
+        // Set timer to stop after 1.5 seconds of silence
+        if (finalTranscript) {
+          silenceTimerRef.current = setTimeout(() => {
+            if (isRecording) {
+              stopRecordingAndSubmit();
+            }
+          }, 1500);
+        }
+      };
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('Speech recognition error:', event.error);
+
+      };
+
+      recognitionRef.current = recognition;
     }
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+      }
+    };
+  }, []);
+
+
+
+
+  const stopRecordingAndSubmit = () => {
+    if (!recognitionRef.current) return;
+
+    recognitionRef.current.stop();
+    setIsRecording(false);
+
+    // Get the final transcript (last line)
+    const finalTranscript = transcript.split('\n').filter(t => t).pop() || '';
+
+    if (finalTranscript.trim()) {
+      // Use only the transcript, don't combine with inputValue
+      handleSendMessage(finalTranscript.trim());
+      setTranscript('');
+      setInputValue(''); // Clear input if needed
     }
   };
-}, []);
 
+  const startRecording = async () => {
+    try {
+      // Check microphone permissions first
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
 
-
-
-const stopRecordingAndSubmit = () => {
-  if (!recognitionRef.current) return;
-  
-  recognitionRef.current.stop();
-  setIsRecording(false);
-  
-  // Get the final transcript (last line)
-  const finalTranscript = transcript.split('\n').filter(t => t).pop() || '';
-  
-  if (finalTranscript.trim()) {
-    // Use only the transcript, don't combine with inputValue
-    handleSendMessage(finalTranscript.trim());
-    setTranscript('');
-    setInputValue(''); // Clear input if needed
-  }
-};
-
-const startRecording = async () => {
-  try {
-    // Check microphone permissions first
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach(track => track.stop());
-    
-    setTranscript("");
-    if (recognitionRef.current) {
-      recognitionRef.current.start();
-      setIsRecording(true);
+      setTranscript("");
+      if (recognitionRef.current) {
+        recognitionRef.current.start();
+        setIsRecording(true);
+      }
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+      setIsRecording(false);
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        text: "Could not access microphone. Please check permissions.",
+        isUser: false,
+        timestamp: new Date()
+      }]);
     }
-  } catch (error) {
-    console.error("Error accessing microphone:", error);
-    setIsRecording(false);
-    setMessages(prev => [...prev, {
-      id: Date.now().toString(),
-      text: "Could not access microphone. Please check permissions.",
-      isUser: false,
-      timestamp: new Date()
-    }]);
-  }
-};
+  };
 
-const toggleRecording = () => {
-  if (isRecording) {
-    stopRecordingAndSubmit();
-  } else {
-    startRecording();
-  }
-};
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecordingAndSubmit();
+    } else {
+      startRecording();
+    }
+  };
 
 
-const handleDownloadChat = () => {
+  const handleDownloadChat = () => {
     if (messages.length <= 1) {
       toast.error("No chat to download!", {
         description: "Start a conversation first, then download your chat history.",
@@ -495,15 +497,70 @@ ${"=".repeat(60)}
     })
   }
 
+  // File upload handler
+  const onDrop = async (acceptedFiles: File[]) => {
+    if (!acceptedFiles.length) return
+    setIsUploading(true)
+    const file = acceptedFiles[0]
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      const fileContent = e.target?.result as string
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        text: `Uploaded file: ${file.name}`,
+        isUser: true,
+        timestamp: new Date()
+      }])
+      try {
+        // Send file content to Gemini API
+        const response = await ai.models.generateContent({
+          model: "gemini-2.0-flash",
+          contents: `Read and explain this file:\n\n${fileContent}`,
+          config: {
+            systemInstruction: `
+              You are QueueBee. The user has uploaded a file. Read its contents and explain in Hinglish, following your usual style and formatting rules. End with "Chamka?".
+            `
+          }
+        })
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: response.text || "Couldn't read file. Try again!",
+          isUser: false,
+          timestamp: new Date()
+        }])
+        showRandomEmotionImage()
+      } catch (error) {
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 2).toString(),
+          text: "Error reading file with Gemini API.",
+          isUser: false,
+          timestamp: new Date()
+        }])
+      } finally {
+        setIsUploading(false)
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  const { getRootProps, getInputProps, open } = useDropzone({
+    onDrop,
+    multiple: false,
+    noClick: true,
+    noKeyboard: true,
+    accept: {
+      'text/*': ['.txt', '.js', '.ts', '.json', '.md', '.cpp', '.py', '.java']
+    }
+  })
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 overflow-scroll">
       <Header />
-
       {/* Emotion Image Animation */}
       {activeEmotionImage && (
         <div className={`fixed right-8 bottom-1/3 z-50 transition-all duration-1000 ease-in-out ${isImageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <img 
-            src={activeEmotionImage.src} 
+          <img
+            src={activeEmotionImage.src}
             alt={activeEmotionImage.alt}
             className="w-80 h-80 object-contain"
           />
@@ -519,15 +576,15 @@ ${"=".repeat(60)}
                 <div className="flex items-center gap-3">
                   <Avatar className="h-12 w-12 bg-gradient-to-r from-purple-600 to-purple-700 shadow-lg">
                     <AvatarFallback className="text-white font-bold">
-                      <img 
-                        src="/avatar.png" 
+                      <img
+                        src="/avatar.png"
                         alt="Rohit Bhaiya"
                         className="w-full h-full object-cover"
                       />
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="font-semibold text-white">Rohit Bhaiya</h3>
+                    <h3 className="font-semibold text-white">Syntax Error</h3>
                     <Badge className="text-xs bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/20">
                       Online
                     </Badge>
@@ -538,15 +595,15 @@ ${"=".repeat(60)}
                 <div className="space-y-2 text-sm text-purple-200">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                    <span>IIT Guwahati Alumni</span>
+                    <span>Sandip Foundation</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
-                    <span>Ex-Uber SDE</span>
+                    <span>Third Year Students</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
-                    <span>Coder Army Founder</span>
+                    <span>WebDose Agency Founder</span>
                   </div>
                 </div>
               </CardContent>
@@ -596,7 +653,7 @@ ${"=".repeat(60)}
                   <div className="flex items-center gap-3">
                     <Bot className="w-6 h-6 text-purple-400" />
                     <div>
-                      <h2 className="font-semibold text-white">Chat with Rohit Bhaiya</h2>
+                      <h2 className="font-semibold text-white">Chat with QueueBee</h2>
                       <p className="text-sm text-purple-200">Ask anything about DSA, Web Dev, or Interviews</p>
                     </div>
                   </div>
@@ -630,29 +687,28 @@ ${"=".repeat(60)}
                         >
                           <AvatarFallback className="text-white text-xs font-medium">
                             {message.isUser ? (
-                              <img 
-                                src="/kakashi.png" 
+                              <img
+                                src="/kakashi.png"
                                 alt="User"
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <img 
-                                src="/avatar.png" 
+                              <img
+                                src="/avatar.png"
                                 alt="Rohit Bhaiya"
                                 className="w-full h-full object-cover"
                               />
                             )}
                           </AvatarFallback>
                         </Avatar>
-                        {!message.isUser && <span className="text-xs text-purple-300 font-medium">Rohit Bhaiya</span>}
+                        {!message.isUser && <span className="text-xs text-purple-300 font-medium">Syntax Error</span>}
                       </div>
 
                       <Card
-                        className={`${
-                          message.isUser
-                            ? "bg-gray-700 text-white border-gray-600 shadow-lg"
-                            : "bg-gray-700/80 border-purple-500/30 text-white shadow-lg"
-                        } backdrop-blur-sm`}
+                        className={`${message.isUser
+                          ? "bg-gray-700 text-white border-gray-600 shadow-lg"
+                          : "bg-gray-700/80 border-purple-500/30 text-white shadow-lg"
+                          } backdrop-blur-sm`}
                       >
                         <CardContent className="p-4">
                           {message.isUser ? (
@@ -675,12 +731,12 @@ ${"=".repeat(60)}
                       <div className="flex flex-col items-center gap-1">
                         <Avatar className="h-8 w-8 bg-gray-600/50 border border-purple-500/30">
                           <AvatarFallback className="text-white font-bold">
-                      <img 
-                        src="/avatar.png" 
-                        alt="Rohit Bhaiya"
-                        className="w-full h-full object-cover"
-                      />
-                    </AvatarFallback>
+                            <img
+                              src="/avatar.png"
+                              alt="Rohit Bhaiya"
+                              className="w-full h-full object-cover"
+                            />
+                          </AvatarFallback>
                         </Avatar>
                         <span className="text-xs text-purple-300 font-medium">Rohit Bhaiya</span>
                       </div>
@@ -711,43 +767,53 @@ ${"=".repeat(60)}
               <Separator className="bg-gray-700/50" />
 
               <CardContent className="p-6 bg-gray-800/50 border-t border-purple-500/20">
-  <form onSubmit={handleSubmit} className="flex gap-3">
-   
-<Input
-  value={inputValue}
-  onChange={(e) => setInputValue(e.target.value)}
-  placeholder="Ask Rohit Bhaiya about DSA, Web Dev, or Interview prep..."
-  className="flex-1 bg-gray-700/80 border-purple-500/30 text-white placeholder:text-purple-200 focus:border-purple-400 focus:ring-purple-400/50"
-  disabled={isTyping}
-/>
+                {/* File upload dropzone */}
+                <div {...getRootProps()} className="mb-2">
+                  <input {...getInputProps()} />
+                </div>
+                <form onSubmit={handleSubmit} className="flex gap-3">
+                  <Input
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Ask QueueBee about DSA, Web Dev, or Interview prep..."
+                    className="flex-1 bg-gray-700/80 border-purple-500/30 text-white placeholder:text-purple-200 focus:border-purple-400 focus:ring-purple-400/50"
+                    disabled={isTyping}
+                  />
 
-
-
-   <Button
-  type="button"
-  onClick={toggleRecording}
-  disabled={isTyping}
-  className={`${
-    isRecording ? "bg-red-600 hover:bg-red-700 animate-pulse" : "bg-gray-600 hover:bg-gray-700"
-  } transition-all duration-200`}
->
-  {isRecording ? <StopCircle className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-</Button>
-    <Button
-      type="submit"
-      disabled={!inputValue.trim() || isTyping}
-      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg"
-    >
-      <Send className="w-4 h-4" />
-    </Button>
-  </form>
-  <p className="text-xs text-purple-300 mt-2 text-center">
-    Press Enter to send • {isRecording ? "Recording..." : "Press mic to speak"} • Powered by Coder Army ❤️
-  </p>
-</CardContent>
+                  <Button
+                    type="button"
+                    onClick={toggleRecording}
+                    disabled={isTyping}
+                    className={`${isRecording ? "bg-red-600 hover:bg-red-700 animate-pulse" : "bg-gray-600 hover:bg-gray-700"
+                      } transition-all duration-200`}
+                  >
+                    {isRecording ? <StopCircle className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={open}
+                    disabled={isTyping || isUploading}
+                    className="bg-blue-600 hover:bg-blue-700 transition-all duration-200"
+                  >
+                    {isUploading ? "Uploading..." : "Upload File"}
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={!inputValue.trim() || isTyping}
+                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </form>
+                <p className="text-xs text-purple-300 mt-2 text-center">
+                  Press Enter to send • {isRecording ? "Recording..." : "Press mic to speak"} • Or upload a file to get explanation • Powered by Syntax Error ❤️
+                </p>
+              </CardContent>
             </Card>
           </div>
+          {/* ...existing code... */}
         </div>
+        {/* ...existing code... */}
       </div>
     </div>
   )
