@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, ChevronDown, Zap, BarChart3, Search, Network, GitBranch, Info, Sun, Moon, Box, Layers, Database, ListTree, MessageSquare } from "lucide-react";
+import { Menu, X, ChevronDown, Zap, BarChart3, Search, Network, GitBranch, Info, Sun, Moon, Box, Layers, Database, ListTree, MessageSquare, ExternalLink, Briefcase } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { ThemeProvider } from "./context/theme";
 
@@ -42,6 +42,16 @@ export default function Navbar() {
     document.documentElement.classList.remove("dark", "light");
     document.documentElement.classList.add(theme);
   }, [theme]);
+
+  // Handler to open quiz in new tab
+  const openQuiz = () => {
+    window.open("https://genie-flash-quiz.vercel.app/", "_blank", "noopener,noreferrer");
+  };
+
+  // Handler to open interview prep in new tab
+  const openInterviewPrep = () => {
+    window.open("http://interview-prep-bot-ten.vercel.app", "_blank", "noopener,noreferrer");
+  };
 
   return (
     <>
@@ -154,9 +164,32 @@ export default function Navbar() {
                   Chat
                 </Link>
 
+                {/* Add Quiz link here */}
+                <Button
+                  variant="ghost"
+                  className="text-slate-700 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium flex items-center"
+                  onClick={openQuiz}
+                >
+                  <ExternalLink className="h-4 w-4 mr-1 text-pink-500" />
+                  Quiz
+                </Button>
+
+                {/* Add Interview Prep link here */}
+                <Button
+                  variant="ghost"
+                  className="text-slate-700 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium flex items-center"
+                  onClick={openInterviewPrep}
+                >
+                  <Briefcase className="h-4 w-4 mr-1 text-orange-500" />
+                  Interview Prep
+                </Button>
+
+                {/* Move About to the far right */}
+                <div className="flex-1" />
                 <Link
                   to="/about"
                   className="text-slate-700 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium"
+                  style={{ marginLeft: "auto" }}
                 >
                   About
                 </Link>
@@ -297,6 +330,31 @@ export default function Navbar() {
                   Chat
                 </Link>
 
+                {/* Add Quiz link mobile */}
+                <button
+                  className="text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 block px-3 py-2 rounded-md text-base font-medium flex items-center w-full"
+                  onClick={() => {
+                    setIsOpen(false);
+                    openQuiz();
+                  }}
+                >
+                  <ExternalLink className="h-5 w-5 mr-2 text-pink-500" />
+                  Quiz
+                </button>
+
+                {/* Add Interview Prep link mobile */}
+                <button
+                  className="text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 block px-3 py-2 rounded-md text-base font-medium flex items-center w-full"
+                  onClick={() => {
+                    setIsOpen(false);
+                    openInterviewPrep();
+                  }}
+                >
+                  <Briefcase className="h-5 w-5 mr-2 text-orange-500" />
+                  Interview Prep
+                </button>
+
+                {/* About stays at the bottom for mobile */}
                 <Link
                   to="/about"
                   className="text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 block px-3 py-2 rounded-md text-base font-medium"
