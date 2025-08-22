@@ -26,13 +26,12 @@ export default function Hero() {
             <span className="bg-clip-text text-transparent 
               bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 
               dark:from-blue-400 dark:via-teal-300 dark:to-cyan-500">
-              Visualize
+              Beyond the Code:
             </span>{" "}
-            Data Structures & Algorithms
+            Interactive Visualizations
           </h1>
           <p className="text-xl text-slate-700 dark:text-slate-300 max-w-3xl mb-10">
-            Explore, understand, and master algorithms through interactive visualizations. Compare algorithm performance
-            in real-time with our unique Race Mode.
+            Unlock your coding potential with our all-in-one platform. From mastering algorithms and data structures to acing technical interviews, we provide the tools you need to succeed. Sharpen your skills with interactive quizzes and challenge yourself in our real-time race mode.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
@@ -52,7 +51,7 @@ export default function Hero() {
                 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               <div onClick={scrollToSection} className="flex items-center gap-2">
-                <Code2  className="h-5 w-5" />
+                <Code2 className="h-5 w-5" />
                 Explore Algorithms
                 <ArrowRight className="h-4 w-4 ml-1" />
               </div>
