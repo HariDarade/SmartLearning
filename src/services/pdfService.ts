@@ -1,0 +1,177 @@
+
+interface QuizQuestion {
+    question: string;
+    options: string[];
+    correctAnswer: string;
+}
+
+interface Flashcard {
+    term: string;
+    definition: string;
+}
+
+interface StudyData {
+    quiz: QuizQuestion[];
+    flashcards: Flashcard[];
+}
+
+const GEMINI_API_KEY = 'AIzaSyBBzb0nCGeCE6ok1WlMPePf-MK0GiCc9tk';
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+export class PDFService {
+    static async extractTextFromPDF(file: File): Promise<string> {
+        try {
+            console.log('Converting PDF to base64...');
+            const base64Data = await this.fileToBase64(file);
+
+            // Use Gemini to extract and understand the PDF content
+            const prompt = `Please extract and analyze the text content from this PDF document. 
+      Extract all meaningful text, headings, paragraphs, and key information. 
+      Ignore any formatting artifacts or binary data. 
+      Return only the clean, readable text content that can be used for educational purposes.`;
+
+            const response = await fetch(GEMINI_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: prompt },
+                            {
+                                inline_data: {
+                                    mime_type: file.type,
+                                    data: base64Data
+                                }
+                            }
+                        ]
+                    }]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Gemini API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const extractedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (!extractedText || extractedText.length < 50) {
+                throw new Error('Could not extract sufficient text from the PDF');
+            }
+
+            console.log('Successfully extracted text from PDF:', extractedText.substring(0, 200) + '...');
+            return extractedText;
+        } catch (error) {
+            console.error('Error extracting text from PDF:', error);
+            throw new Error('Failed to analyze PDF content. Please ensure the PDF contains readable text.');
+        }
+    }
+
+    private static async fileToBase64(file: File): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64String = reader.result as string;
+                // Remove the data URL prefix (data:application/pdf;base64,)
+                const base64Data = base64String.split(',')[1];
+                resolve(base64Data);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    static async generateStudyMaterials(text: string): Promise<StudyData> {
+        try {
+            console.log('Generating study materials using Gemini...');
+
+            const prompt = `Based on the following document content, create educational study materials:
+
+DOCUMENT CONTENT:
+${text}
+
+Please generate:
+1. EXACTLY 5 multiple-choice quiz questions with 4 options each
+2. EXACTLY 8 flashcards with terms and definitions
+
+Requirements:
+- Questions should test understanding of key concepts from the document
+- Each question should have exactly 4 plausible options
+- Include detailed explanations for why the correct answer is right and why wrong answers are incorrect
+- Flashcards should cover important terms, concepts, or facts from the content
+- Make sure all content is directly related to the document provided
+
+Format your response as valid JSON in this exact structure:
+{
+  "quiz": [
+    {
+      "question": "Question text here?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": "Option A",
+      "explanation": "Detailed explanation of why this is correct and why other options are wrong"
+    }
+  ],
+  "flashcards": [
+    {
+      "term": "Term here",
+      "definition": "Definition here"
+    }
+  ]
+}
+
+IMPORTANT: Respond with ONLY the JSON object, no additional text or formatting.`;
+
+            const response = await fetch(GEMINI_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{ text: prompt }]
+                    }]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Gemini API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const generatedContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (!generatedContent) {
+                throw new Error('No content generated by Gemini');
+            }
+
+            // Parse the JSON response
+            let studyData: StudyData;
+            try {
+                // Clean the response in case it has markdown formatting
+                const cleanedContent = generatedContent.replace(/```json\n?|\n?```/g, '').trim();
+                studyData = JSON.parse(cleanedContent);
+            } catch (parseError) {
+                console.error('Error parsing Gemini response:', parseError);
+                console.log('Raw response:', generatedContent);
+                throw new Error('Failed to parse generated study materials');
+            }
+
+            // Validate the response structure
+            if (!studyData.quiz || !Array.isArray(studyData.quiz) || studyData.quiz.length === 0) {
+                throw new Error('Invalid quiz data generated');
+            }
+
+            if (!studyData.flashcards || !Array.isArray(studyData.flashcards) || studyData.flashcards.length === 0) {
+                throw new Error('Invalid flashcard data generated');
+            }
+
+            console.log('Successfully generated study materials:', studyData);
+            return studyData;
+        } catch (error) {
+            console.error('Error generating study materials:', error);
+            throw error;
+        }
+    }
+}

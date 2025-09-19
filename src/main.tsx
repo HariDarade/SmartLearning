@@ -15,6 +15,8 @@ import Sorting from './pages/Sorting.tsx';
 import Race from './pages/race/Race.tsx';
 // Import your Chat page
 import Chat from './pages/Chat';
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
 
 let router = createBrowserRouter([
   {
@@ -31,7 +33,10 @@ let router = createBrowserRouter([
       { path: "data-structures/stacks", element: <StacksPage /> },
       { path: "data-structures/linked-lists", element: <LinkedListsPage /> },
       // ---- Add this line for Chat route ----
-      { path: "chat", element: <Chat /> }
+      { path: "chat", element: <Chat /> },
+      { path: "queuebee", element: <Index /> },
+      { path: "queuebee/*", element: <NotFound /> },
+
     ],
   },
 ]);
