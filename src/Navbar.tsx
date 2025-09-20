@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, ChevronDown, Zap, BarChart3, Search, Network, GitBranch, Info, Sun, Moon, Box, Layers, Database, ListTree, MessageSquare, ExternalLink, Briefcase, BookOpen } from "lucide-react";
+import { Menu, X, ChevronDown, Zap, BarChart3, Search, Network, GitBranch, Info, Sun, Moon, Box, Layers, Database, ListTree, MessageSquare, Briefcase, BookOpen } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { ThemeProvider } from "./context/theme";
 
