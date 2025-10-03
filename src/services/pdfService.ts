@@ -15,7 +15,7 @@ interface StudyData {
     flashcards: Flashcard[];
 }
 
-const GEMINI_API_KEY = 'AIzaSyBBzb0nCGeCE6ok1WlMPePf-MK0GiCc9tk';
+const GEMINI_API_KEY = 'AIzaSyBa7wEEXuU5ymqnADqOCl63FdS_6E6z_6M';
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 export class PDFService {

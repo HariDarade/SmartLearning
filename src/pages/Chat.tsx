@@ -111,7 +111,7 @@ const TypewriterText = ({ text, onComplete }: { text: string; onComplete?: () =>
   return <FormattedText text={displayedText} />
 }
 
-const ai = new GoogleGenAI({ apiKey: "AIzaSyAwEKO5UGhg8HJLZzZphDHfISFEcN5iJhU" })
+const ai = new GoogleGenAI({ apiKey: "AIzaSyBa7wEEXuU5ymqnADqOCl63FdS_6E6z_6M" })
 
 interface Message {
   id: string
